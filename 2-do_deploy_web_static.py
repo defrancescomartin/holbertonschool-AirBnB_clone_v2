@@ -49,8 +49,7 @@ def deploy():
     print(path)
     if path is None:
         return False
-
-    return do_deploy(path)
-
-
-deploy()
+    deploy = do_deploy(path)
+    if deploy is False:
+        return False
+    return deploy
