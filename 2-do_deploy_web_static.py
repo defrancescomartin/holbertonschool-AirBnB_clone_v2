@@ -1,46 +1,30 @@
 #!/usr/bin/python3
-""" Fabric script (based on the file 1-pack_web_static.py)
-that distributes an archive to your web servers, using the function
-do_deploy"""
+"""Fabric script that distributes an archive
+to your web servers, using the function do_deploy"""
 
-from datetime import datetime
 from fabric.api import local, put, env, run
 from os import path
-env.hosts = ['34.229.91.198', '	54.234.82.120']
+env.hosts = ['34.229.91.198', '54.234.82.120']
 env.user = "ubuntu"
-
-def do_pack():
-    """Compress before sending"""
-    local("mkdir -p versions")
-    # create the name of file in str format from datetime.now
-    name = "web_static_" + datetime.strftime(datetime.now(),
-                                             "%Y%m%d%H%M%S") + ".tgz"
-    try:
-        local("tar -czvf ./versions/{} ./web_static" .format(name))
-        return(name)
-    except:
-        return(None)
 
 
 def do_deploy(archive_path):
-    """Distributes a .tgz archive through web servers
-    """
-
-    if path.exists(archive_path):
-        archive = archive_path.split('/')[1]
-        a_path = "/tmp/{}".format(archive)
-        folder = archive.split('.')[0]
-        f_path = "/data/web_static/releases/{}/".format(folder)
-
-        put(archive_path, a_path)
-        run("mkdir -p {}".format(f_path))
-        run("tar -xzf {} -C {}".format(a_path, f_path))
-        run("rm {}".format(a_path))
-        run("mv -f {}web_static/* {}".format(f_path, f_path))
-        run("rm -rf {}web_static".format(f_path))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {} /data/web_static/current".format(f_path))
-
+    """function to distribute an archive to web server"""
+    if not (path.exists(archive_path)):
+        return False
+    try:
+        put(archive_path, "/tmp/")
+        name = archive_path.split('/')[1].split('.')[0]
+        run("sudo mkdir -p /data/web_static/releases/{}".format(name))
+        run("sudo tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}"
+            .format(name, name))
+        run("sudo rm /tmp/{}.tgz".format(name))
+        run("sudo mv /data/web_static/releases/{}/web_static/* \
+            /data/web_static/releases/{}/".format(name, name))
+        run("sudo rm -rf /data/web_static/releases/{}/web_static".format(name))
+        run("sudo rm -rf /data/web_static/current")
+        run("sudo ln -s /data/web_static/releases/{}/ /data/web_static/current"
+            .format(name))
         return True
-
-    return False
+    except:
+        return False
