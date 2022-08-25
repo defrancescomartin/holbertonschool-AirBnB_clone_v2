@@ -28,3 +28,16 @@ def do_deploy(archive_path):
         return True
     except:
         return False
+
+
+def deploy():
+    """Compress and upload files to remote server."""
+    path = do_pack()
+    print(path)
+    if path is None:
+        return False
+
+    return do_deploy(path)
+
+
+deploy()
