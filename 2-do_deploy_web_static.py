@@ -8,6 +8,19 @@ env.hosts = ['34.229.91.198', '54.234.82.120']
 env.user = "ubuntu"
 
 
+def do_pack():
+    """Compress before sending"""
+    local("mkdir -p versions")
+    # create the name of file in str format from datetime.now
+    name = "web_static_" + datetime.strftime(datetime.now(),
+                                             "%Y%m%d%H%M%S") + ".tgz"
+    try:
+        local("tar -czvf ./versions/{} ./web_static" .format(name))
+        return(name)
+    except:
+        return(None)
+
+
 def do_deploy(archive_path):
     """function to distribute an archive to web server"""
     if not (path.exists(archive_path)):
